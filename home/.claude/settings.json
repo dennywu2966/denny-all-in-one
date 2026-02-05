@@ -1,0 +1,127 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls)",
+      "Bash(git status)",
+      "Bash(npm test)",
+      "Bash(echo *)",
+      "Bash(gradlew *)",
+      "Bash(curl *)",
+      "Bash(jq *)",
+      "Bash(find *)",
+      "ReadFile",
+      "ListDirectory",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(pwd)",
+      "Bash(whoami)",
+      "Bash(echo *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git checkout *)",
+      "Bash(git branch *)",
+      "Bash(./gradlew *)",
+      "Bash(gradle *)",
+      "Bash(mvn *)",
+      "Bash(java *)",
+      "Bash(npm *)",
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(node *)",
+      "Bash(docker ps *)",
+      "Bash(docker logs *)",
+      "Bash(docker-compose *)",
+      "Bash(ps *)",
+      "Bash(curl *)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "playwright",
+    "web-reader",
+    "zread",
+    "jina",
+    "zai-mcp-server",
+    "context7",
+    "aliyun-bailian",
+    "rube"
+  ],
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/skills/checkpoint/scripts/checkpoint.py\" --hook >/dev/null 2>&1"
+          }
+        ]
+      },
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/skills/checkpoint/scripts/checkpoint.py\" --hook >/dev/null 2>&1"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/skills/checkpoint/scripts/checkpoint.py\" --hook >/dev/null 2>&1"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "python3 \"$HOME/.claude/scripts/ccstatusline-glm.py\"",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "Notion@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "serena@claude-plugins-official": false,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": true,
+    "learning-output-style@claude-plugins-official": true,
+    "glm-plan-usage@zai-coding-plugins": true,
+    "glm-plan-bug@zai-coding-plugins": true,
+    "superpowers@claude-plugins-official": true,
+    "plugin-dev@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "document-skills@anthropic-agent-skills": true,
+    "example-skills@anthropic-agent-skills": true,
+    "planning-with-files@planning-with-files": true,
+    "agent-sdk-dev@claude-plugins-official": true,
+    "mgrep@Mixedbread-Grep": true,
+    "supabase@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "greptile@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "jdtls-lsp@claude-plugins-official": true
+  }
+}

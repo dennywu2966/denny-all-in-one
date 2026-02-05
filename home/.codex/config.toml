@@ -1,0 +1,36 @@
+model = "gpt-5.2-codex"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+[projects."/home/denny"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/elasticsearch"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/support-ram"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/kibana"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/tests-beads-superpower"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/openclaw"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/es-lance-iam-demo"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/pai_mem0_finetune_lab"]
+trust_level = "trusted"
+
+[features]
+unified_exec = true
+shell_snapshot = true
+
+[notice.model_migrations]
+"gpt-5.2" = "gpt-5.2-codex"

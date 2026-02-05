@@ -1,0 +1,55 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--headless"
+      ]
+    },
+    "web-reader": {
+      "command": "npx",
+      "args": [
+        "@dexaai/web-reader-mcp@latest"
+      ]
+    },
+    "zread": {
+      "command": "npx",
+      "args": [
+        "@thinkany/mcp-zread@latest"
+      ]
+    },
+    "jina": {
+      "command": "npx",
+      "args": [
+        "jina-mcp-tools@latest"
+      ]
+    },
+    "zai-mcp-server": {
+      "command": "npx",
+      "args": [
+        "@z_ai/mcp-server@latest"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "aliyun-bailian": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "bailian-mcp-server"
+      ]
+    },
+    "rube": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://rube.app/mcp"
+      ]
+    }
+  }
+}

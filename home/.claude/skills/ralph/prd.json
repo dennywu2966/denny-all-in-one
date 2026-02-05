@@ -1,0 +1,328 @@
+{
+  "project": "Lance Vector Plugin Demo - Enhanced UI",
+  "branchName": "ralph/vector-search-demo-enhancement",
+  "description": "Enhanced vector search demo with end-to-end workflow: fake docs → Jina embeddings → Lance/OSS → ES backfill → fusion search with performance visualization and query inspection",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create hardcoded fake documents data structure",
+      "description": "As a developer, I need a data structure for 20 fake tech documents so that I can use them throughout the system.",
+      "acceptanceCriteria": [
+        "Create array of 20 documents with fields: id (UUID), title, text (200-500 chars), topic, created_at",
+        "Topics cover: AI, databases, search engines, cloud computing, vector search, etc.",
+        "Export from lib/data.ts as FAKE_DOCUMENTS",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add Jina API client utility function",
+      "description": "As a developer, I need a utility function to call Jina Embeddings API so that I can generate vectors for documents.",
+      "acceptanceCriteria": [
+        "Create function generateEmbeddings(text: string[]): Promise<number[][]> in lib/utils.ts",
+        "Use Jina Embeddings API v2 (endpoint: https://api.jina.ai/v1/embeddings)",
+        "Read API key from process.env.JINA_API_KEY",
+        "Return vectors as array of float32 arrays",
+        "Handle API errors gracefully",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Extend OSS client Python script for Lance dataset creation",
+      "description": "As a developer, I need to extend the Python script in lib/oss-client.ts to create Lance datasets with vectors from Jina API.",
+      "acceptanceCriteria": [
+        "Modify Python script to accept documents and vectors as input",
+        "Create Lance dataset with schema: id (string), title, text, topic, created_at, vector (fixed_size_list<float32>)",
+        "Create IVF_PQ vector index on the dataset",
+        "Set id as primary key",
+        "Save dataset to temporary file path",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Update OSS credentials reading from ~/.oss/",
+      "description": "As a developer, I need to read OSS credentials from ~/.oss/ directory so that I can upload datasets securely.",
+      "acceptanceCriteria": [
+        "Create function readOSSCredentials() in lib/oss-client.ts",
+        "Support ~/.oss/config and ~/.oss/credentials file formats",
+        "Parse accessKeyId and secretAccessKey from files",
+        "Return credentials object or null if not found",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Create API route for dataset generation",
+      "description": "As a developer, I need an API route that orchestrates document generation, embedding, Lance creation, and OSS upload.",
+      "acceptanceCriteria": [
+        "Create app/api/vectors/generate/route.ts",
+        "Generate embeddings for all FAKE_DOCUMENTS using Jina API",
+        "Call Python script to create Lance dataset with documents and vectors",
+        "Read OSS credentials and upload to denny-test-lance bucket at lance-documents/dataset.lance",
+        "Clean up temporary files after upload",
+        "Return success with document count and OSS path",
+        "Handle errors at each stage (Jina API, Lance, OSS)",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Create DocumentGeneration UI component",
+      "description": "As a user, I want a UI section to generate and upload datasets so that I can populate the demo with data.",
+      "acceptanceCriteria": [
+        "Create components/DocumentGeneration.tsx with glass-card styling",
+        "Add 'Generate Dataset' button that triggers API call",
+        "Show loading state during generation",
+        "Display success message with document count and OSS path",
+        "Display error message with retry option on failure",
+        "Use Framer Motion animations from lib/animations.ts",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Update Lance dataset viewer to display full documents",
+      "description": "As a user, I want to view complete document content from the Lance dataset so that I can understand what data is being searched.",
+      "acceptanceCriteria": [
+        "Modify existing view function in app/api/vectors/ route.ts to read title and text fields",
+        "Update VectorManagement component to display: title, full text, topic, id, created_at",
+        "Use glass-card styling consistent with existing UI",
+        "Show empty state when no dataset exists",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Create Elasticsearch client utility",
+      "description": "As a developer, I need an Elasticsearch client utility so that I can perform index and search operations.",
+      "acceptanceCriteria": [
+        "Create lib/elasticsearch.ts with ES client configuration",
+        "Connect to http://localhost:9200 with credentials elastic:JJs+DtAm1Q0lf-vLJVZ4",
+        "Export client instance and helper functions: indexExists(), createIndex(), bulkIndex()",
+        "Handle connection errors gracefully",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Create Elasticsearch backfill API route",
+      "description": "As a developer, I need an API route to backfill documents from Lance dataset into Elasticsearch.",
+      "acceptanceCriteria": [
+        "Create app/api/vectors/backfill/route.ts",
+        "Check if index 'demo-documents' exists, return early if it does",
+        "Create index with mapping: id (keyword), title (text), text (text), topic (keyword), created_at (date)",
+        "Read documents from Lance dataset in OSS",
+        "Bulk insert all documents (without vector field)",
+        "Return success with indexed document count",
+        "Handle connection and authentication errors",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Create BackfillSection UI component",
+      "description": "As a user, I want a backfill button in the Vector Management section so that I can populate Elasticsearch with documents.",
+      "acceptanceCriteria": [
+        "Create components/BackfillSection.tsx with glass-card styling",
+        "Add 'Backfill to Elasticsearch' button",
+        "Show progress indicator during backfill",
+        "Display success message with document count",
+        "Disable button if backfill already completed (check API)",
+        "Use Framer Motion animations",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Create fusion search API route with timing",
+      "description": "As a developer, I need an API route that performs fusion search and returns timing data for performance visualization.",
+      "acceptanceCriteria": [
+        "Create app/api/search/route.ts (or extend existing)",
+        "Accept query parameters: q (search text), bm25Weight, knnWeight, size",
+        "Construct Elasticsearch bool query with match (BM25) and knn sections",
+        "Execute query and measure duration of: BM25, kNN, fusion merge, total",
+        "Return: results (id, title, topic, text, score), timings, actualQueryDSL",
+        "Handle connection errors gracefully",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Create FusionSearch UI component - search input",
+      "description": "As a user, I want a search input field so that I can perform fusion search queries.",
+      "acceptanceCriteria": [
+        "Create components/FusionSearch.tsx with glass-card styling",
+        "Add text input with placeholder 'Enter keywords or a natural language question...'",
+        "Add 'Advanced Options' collapsible section with sliders for BM25/kNN weights and result count",
+        "Add 'Search' button that triggers API call",
+        "Use Framer Motion for collapsible animation",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add search results display to FusionSearch component",
+      "description": "As a user, I want to see search results with document cards so that I can review relevant documents.",
+      "acceptanceCriteria": [
+        "Display search results as cards below search input",
+        "Each card shows: title, topic, relevance score, text snippet",
+        "Use glass-card styling consistent with existing UI",
+        "Show empty state when no results",
+        "Show loading state during search",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add view/hide details toggle to search result cards",
+      "description": "As a user, I want to expand/collapse full document details in search results so that I can dive deep when needed.",
+      "acceptanceCriteria": [
+        "Add 'View Details' / 'Hide Details' toggle button to each result card",
+        "Default state: hidden (show only title, topic, score, snippet)",
+        "Expanded state: show full text, created_at, individual BM25 and kNN scores",
+        "Smooth expand/collapse animation using max-height transition",
+        "Toggle button text changes based on state",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Add query inspector section to FusionSearch component",
+      "description": "As a user, I want to view and edit the actual Elasticsearch query so that I can understand and experiment with fusion search.",
+      "acceptanceCriteria": [
+        "Add 'View/Edit Query' collapsible section below search input",
+        "Display actual Elasticsearch DSL query in styled code block",
+        "Add 'Execute Modified Query' and 'Reset to Default' buttons",
+        "Validate JSON syntax before sending modified query",
+        "Show validation error if JSON is invalid",
+        "Collapse by default",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Create PerformanceTimeline waterfall chart component",
+      "description": "As a user, I want to see a visual waterfall of search timing so that I can identify bottlenecks.",
+      "acceptanceCriteria": [
+        "Create components/PerformanceTimeline.tsx with glass-card styling",
+        "Accept timings data: { bm25, knn, fusion, total }",
+        "Display waterfall chart with HTML/CSS bars (X-axis: time in ms, Y-axis: stages)",
+        "Color-code stages: BM25 (blue), kNN (green), fusion (purple)",
+        "Show tooltip on hover with exact duration and stage name",
+        "Highlight slowest stage in red",
+        "Display summary text: 'Total: Xms (BM25: Yms, kNN: Zms, fusion: Wms)'",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Integrate PerformanceTimeline into FusionSearch",
+      "description": "As a user, I want to see performance timing after each search so that I can understand query performance.",
+      "acceptanceCriteria": [
+        "Add PerformanceTimeline component below search results in FusionSearch",
+        "Pass timing data from search API response to PerformanceTimeline",
+        "Show timeline only when search results are present",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Integrate all new components into homepage",
+      "description": "As a user, I want to see all new features on the homepage so that I can use the complete workflow.",
+      "acceptanceCriteria": [
+        "Add DocumentGeneration section to app/page.tsx",
+        "Add BackfillSection to Vector Management section",
+        "Add FusionSearch section with PerformanceTimeline",
+        "Maintain consistent section spacing and layout",
+        "Ensure all sections use existing animations.ts variants",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Regression test existing features",
+      "description": "As a user, I want to ensure all existing features still work correctly after the new changes.",
+      "acceptanceCriteria": [
+        "Verify Hero section displays correctly",
+        "Verify Architecture section renders without errors",
+        "Verify ValidationTimeline displays properly",
+        "Verify PerformanceDashboard shows static metrics",
+        "Verify VectorManagement (existing parts) works: list, generate, delete, fetch",
+        "Verify LiveDemo section functions",
+        "Verify ContactForm works",
+        "Check for console errors or warnings",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Critical: Ensure no existing UI breaks or visual inconsistencies"
+    }
+  ]
+}

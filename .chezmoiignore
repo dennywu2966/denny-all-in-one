@@ -1,0 +1,58 @@
+# chezmoi ignore patterns
+# These files/directories will NOT be managed by chezmoi
+
+# Machine-specific state (never sync)
+# NOTE: .claude.json is now included as .claude.json.tmpl to preserve user preferences
+# Only exclude sensitive credentials:
+.claude/.credentials.json
+.claude/history.jsonl
+.claude/stats-cache.json
+.claude/checkpoint.log
+.claude/file-history/
+.claude/projects/
+.claude/session-env/
+.claude/shell-snapshots/
+.claude/tmp/
+.claude/debug/
+.claude/cache/
+.claude/paste-cache/
+.claude/telemetry/
+.claude/log/
+.claude/sessions/
+.claude/ide/
+.claude/statsig/
+.claude/tasks/
+
+# Codex state (never sync)
+.codex/auth.json
+.codex/history.jsonl
+.codex/models_cache.json
+.codex/log/
+.codex/sessions/
+.codex/shell_snapshots/
+.codex/tmp/
+
+# Local overrides
+.local_*.tmpl
+.bashrc.local
+.bashrc.d/local.sh
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor/temp files
+*.swp
+*.swo
+*~
+*.bak
+
+# Node modules (including in skills/)
+node_modules/
+**/node_modules/
+
+# Python cache (if any)
+__pycache__/
+*.pyc
+.venv/
+venv/
