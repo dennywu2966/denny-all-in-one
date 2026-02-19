@@ -120,33 +120,18 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# API Keys - Set these in ~/.bashrc.local (not tracked in git)
-# export RAM_AK="..."
-# export RAM_SK="..."
-# export JINA_API_KEY="..."
-# export DASHSCOPE_API_KEY="..."
-# export APP_ID="..."
-# export Z_AI_API_KEY="..."
-# export BIGMODEL_TOKEN="..."
-# export RUBE_TOKEN="..."
-# export KAGGLE_API_TOKEN="..."
+# Aliyun Bailian MCP Server
+
 
 export Z_AI_MODE="ZHIPU"
 export PATH=$PATH:$(go env GOPATH)/bin
 
-# Load private secrets if exists (not tracked in git)
-[ -f "$HOME/.bashrc.local" ] && source "$HOME/.bashrc.local"
-
-alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+alias claude-mem='bun "/home/denny/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
 
 
 # Search Benchmark Harness API Keys
-export BRAVE_API_KEY="BSA5Nj9EAGNtrBXNLnh4bohPYcJJ-Bp"
-export SERPAPI_KEY="25653a7ee733e82a6cbe29ee1bd5f3804a6bfbb8adaee160d4300d814173b173"
-export EXA_API_KEY="d322a8d3-5eb9-42df-b21a-0aab9811e9aa"
-export TAVILY_API_KEY="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"
-export ZAI_API_KEY="534e6836427d42ef99c9d444db2a0ff3.esuMGWU93qFSYnZq"

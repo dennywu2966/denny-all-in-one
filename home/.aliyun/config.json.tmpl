@@ -1,0 +1,16 @@
+{
+	"current": "default",
+	"profiles": [
+		{
+			"name": "default",
+			"mode": "AK",
+			"access_key_id": "{{ (bitwarden "item" "aliyun-access-key").login.username }}",
+			"access_key_secret": "{{ (bitwarden "item" "aliyun-access-key").login.password }}",
+			"region_id": "ap-southeast-1",
+			"output_format": "json",
+			"language": "en",
+			"site": "china"
+		}
+	],
+	"meta_path": ""
+}

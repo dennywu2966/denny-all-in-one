@@ -37,6 +37,13 @@
 .bashrc.local
 .bashrc.d/local.sh
 
+# Cloud credentials (use templates instead)
+.aliyun/config.json
+.oss/credentials.json
+
+# Agents state (machine-specific)
+.agents/.skill-lock.json
+
 # OS-specific
 .DS_Store
 Thumbs.db
