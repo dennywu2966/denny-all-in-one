@@ -44,3 +44,49 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
+
+call plug#begin()
+" ... your existing plugins ...
+Plug 'nvim-lua/plenary.nvim'
+Plug 'sindrets/diffview.nvim'
+" ... your other plugins ...
+Plug 'nvim-lualine/lualine.nvim'
+" Optional: for fancy icons (if you eventually install a Nerd Font)
+" Plug 'nvim-tree/nvim-web-devicons' 
+call plug#end()
+
+" Essential: Enable True Color for the diff colors to look good on your server
+set termguicolors
+
+" Keybindings (Vimscript style)
+nnoremap <leader>gd :DiffviewOpen<CR>
+nnoremap <leader>gq :DiffviewClose<CR>
+
+" --- Easy Window Navigation ---
+" Use Ctrl + h/j/k/l to move between splits/panels
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+
+
+
+lua << EOF
+-- Use pcall to prevent crashing if the plugin isn't installed yet
+local status_ok, lualine = pcall(require, "lualine")
+if status_ok then
+  lualine.setup({
+    options = {
+      icons_enabled = false,
+      theme = 'onedark',
+      component_separators = '|',
+      section_separators = '',
+    },
+    sections = {
+      lualine_b = {'branch', 'diff'},
+      lualine_c = {'filename'},
+    }
+  })
+end
+EOF

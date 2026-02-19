@@ -11,6 +11,15 @@
 4. **Skills / Commands / Plugins / Hooks**（例如 `.claude/skills/**`、`.claude/commands/**`、个人 `~/.claude/skills/**`）
 5. **本次对话的临时指令**
 
+### 0.2 Web Search and Reading (强制使用 zai MCPs)
+- **默认**: 始终使用 **zai MCP servers** 进行网络搜索和阅读
+- **优先 MCP**: `mcp__zai-mcp-server__` 系列工具
+  - `mcp__zai-mcp-server__analyze_image` - 图片分析
+  - `mcp__zai-mcp-server__ui_to_artifact` - UI 转 Artifact
+  - 其他 zai MCP 工具
+- **仅在明确要求时**: 使用其他工具（如 mgrep、webReader、WebSearch 等）
+- **目的**: zai MCP 提供更好的智能分析和理解能力
+
 ### 0.1 Skills 与 CLAUDE.md 冲突处理（硬规则）
 - **任何 skill/command 的行为如果与本文件或仓库本地规则冲突：必须以 CLAUDE.md 为准。**
 - 发现冲突时：输出「冲突点在哪里 / 影响是什么 / 最安全的解决方案」，不得默默选择。

@@ -1,6 +1,6 @@
-model = "gpt-5.2-codex"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "xhigh"
-personality = "pragmatic"
+personality = "friendly"
 [projects."/home/denny"]
 trust_level = "trusted"
 
@@ -28,9 +28,86 @@ trust_level = "trusted"
 [projects."/home/denny/projects/pai_mem0_finetune_lab"]
 trust_level = "trusted"
 
+[projects."/home/denny/projects/ldap-demo"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/es-lance-in-oss-demo"]
+trust_level = "trusted"
+
+[projects."/home/denny/projects/search_benchmark_harness"]
+trust_level = "trusted"
+
 [features]
 unified_exec = true
 shell_snapshot = true
+collab = true
+apps = true
+
+[notice]
+hide_rate_limit_model_nudge = true
 
 [notice.model_migrations]
 "gpt-5.2" = "gpt-5.2-codex"
+
+[mcp_servers.zai_vision]
+command = "bunx"
+args = ["-y", "@z_ai/mcp-server@latest"]
+env_vars = ["Z_AI_API_KEY", "Z_AI_MODE"]
+
+[mcp_servers.zai_web_search_prime]
+command = "zai-sse-mcp"
+args = ["web_search_prime"]
+env_vars = ["Z_AI_API_KEY"]
+startup_timeout_sec = 20.0
+tool_timeout_sec = 120.0
+
+[mcp_servers.zai_web_reader]
+command = "zai-sse-mcp"
+args = ["web_reader"]
+env_vars = ["Z_AI_API_KEY"]
+startup_timeout_sec = 20.0
+tool_timeout_sec = 120.0
+
+[mcp_servers.zai_zread]
+command = "zai-sse-mcp"
+args = ["zread"]
+env_vars = ["Z_AI_API_KEY"]
+startup_timeout_sec = 20.0
+tool_timeout_sec = 120.0
+
+[mcp_servers.rube]
+url = "https://rube.app/mcp"
+bearer_token_env_var = "RUBE_TOKEN"
+
+[mcp_servers.playwright]
+command = "bunx"
+args = ["--yes", "@playwright/mcp@latest", "--headless"]
+
+[mcp_servers.kaggle]
+command = "bunx"
+args = ["-y", "mcp-remote@latest", "https://www.kaggle.com/mcp", "--header", "Authorization: Bearer ${KAGGLE_API_TOKEN}"]
+env_vars = ["KAGGLE_API_TOKEN"]
+startup_timeout_sec = 30.0
+
+[mcp_servers.mgrep]
+command = "mgrep"
+args = ["mcp"]
+
+[mcp_servers.mermaid]
+command = "claude-mermaid"
+
+[mcp_servers.filesystem]
+command = "bunx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/denny/projects"]
+
+[mcp_servers.ripgrep]
+command = "bunx"
+args = ["-y", "mcp-ripgrep@latest"]
+
+#[mcp_servers.ast_grep]
+#command = "uvx"
+#args = ["--from", "ast-grep-mcp", "ast-grep-mcp"]
+
+[tui]
+status_line = ["context-remaining", "git-branch", "current-dir", "project-root", "five-hour-limit", "context-window-size", "used-tokens", "session-id", "weekly-limit"]
+

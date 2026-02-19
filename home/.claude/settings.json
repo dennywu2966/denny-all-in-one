@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(ls)",
@@ -42,6 +45,7 @@
       "Bash(curl *)"
     ]
   },
+  "model": "opus",
   "enabledMcpjsonServers": [
     "playwright",
     "web-reader",
@@ -95,7 +99,6 @@
     "code-review@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
     "Notion@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
@@ -122,6 +125,8 @@
     "figma@claude-plugins-official": true,
     "greptile@claude-plugins-official": true,
     "hookify@claude-plugins-official": true,
-    "jdtls-lsp@claude-plugins-official": true
+    "jdtls-lsp@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "claude-mem@thedotmack": true
   }
 }
