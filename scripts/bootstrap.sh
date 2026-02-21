@@ -4,6 +4,16 @@
 
 set -euo pipefail
 
+# Parse arguments
+BACKUP_FIRST=false
+for arg in "$@"; do
+    case "$arg" in
+        --backup)
+            BACKUP_FIRST=true
+            ;;
+    esac
+done
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -109,10 +119,21 @@ post_apply() {
   fi
 }
 
+# Run backup if requested
+run_backup() {
+  if [[ "$BACKUP_FIRST" == "true" ]]; then
+    log_info "Creating backup before applying dotfiles..."
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    bash "$SCRIPT_DIR/backup.sh"
+    echo ""
+  fi
+}
+
 # Main execution
 main() {
   log_info "Starting denny-all-in-one bootstrap..."
   detect_os
+  run_backup
   install_chezmoi
   setup_dotfiles "$@"
   init_chezmoi
