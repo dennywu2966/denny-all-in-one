@@ -38,7 +38,12 @@ chezmoi apply
 
 # Option 2: Using bootstrap
 ./scripts/bootstrap.sh
+
+# Option 3: Backup first, then apply (recommended)
+./scripts/bootstrap.sh --backup
 ```
+
+**Tip:** Always backup before applying to preserve your current configurations.
 
 ## IMPORTANT: Keep Sync Scripts Updated
 
@@ -66,6 +71,8 @@ sync_item "$HOME_DIR/.config/tmux/tmux.conf" "$PROJECT_DIR/home/.config/tmux/tmu
 |--------|---------|
 | `sync-from-home.sh` | Pull configs from ~ to project |
 | `bootstrap.sh` | One-time setup on new machine |
+| `backup.sh` | Backup existing dotfiles |
+| `restore.sh` | Restore from backup |
 | `docker-test-simple.sh` | Quick structure verification |
 | `docker-test-full.sh` | Full deployment test |
 | `doctor.sh` | System health check |

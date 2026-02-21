@@ -59,6 +59,8 @@ denny-all-in-one/
 │   └── .profile          # Shell profile
 ├── scripts/              # Utility scripts
 │   ├── bootstrap.sh      # One-time setup script
+│   ├── backup.sh         # Backup existing dotfiles
+│   ├── restore.sh        # Restore from backup
 │   └── doctor.sh         # System health check
 └── docs/                 # Documentation
 ```
@@ -89,6 +91,44 @@ chezmoi apply     # Apply changes to home directory
 
 ```bash
 ~/.local/share/denny-all-in-one/scripts/doctor.sh
+```
+
+## Backup and Restore
+
+### Before Applying (Recommended)
+
+Always backup your existing configurations before applying new dotfiles:
+
+```bash
+./scripts/backup.sh              # Create backup
+./scripts/backup.sh --dry-run    # Preview what would be backed up
+```
+
+### Bootstrap with Backup
+
+```bash
+./scripts/bootstrap.sh --backup  # Backup first, then apply
+```
+
+### Restore from Backup
+
+If something goes wrong, restore your previous configurations:
+
+```bash
+./scripts/restore.sh             # Interactive selection
+./scripts/restore.sh --latest    # Restore most recent backup
+./scripts/restore.sh --dry-run   # Preview restore
+```
+
+### Backup Location
+
+Backups are stored in `~/.dotfiles-backup/` with timestamped directories:
+
+```
+~/.dotfiles-backup/
+├── 2026-02-21_14-30-00/
+├── 2026-02-21_15-00-00/
+└── latest -> 2026-02-21_15-00-00/
 ```
 
 ## Machine-Specific Configuration
