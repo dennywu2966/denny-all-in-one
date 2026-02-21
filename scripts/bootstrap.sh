@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bootstrap script for denny-all-in-one dotfiles
-# Usage: curl -fsSL https://raw.githubusercontent.com/dennybritz/denny-all-in-one/main/scripts/bootstrap.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/main/scripts/bootstrap.sh | bash
 
 set -euo pipefail
 
@@ -59,7 +59,7 @@ install_chezmoi() {
 
 # Clone or update dotfiles repo
 setup_dotfiles() {
-  local REPO_URL="${1:-https://github.com/dennybritz/denny-all-in-one.git}"
+  local REPO_URL="${1:-https://github.com/dennywu2966/denny-all-in-one.git}"
   local REPO_DIR="$HOME/.local/share/denny-all-in-one"
 
   if [[ -d "$REPO_DIR" ]]; then

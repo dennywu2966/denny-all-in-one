@@ -1,26 +1,26 @@
 # denny-all-in-one
 
-> My personal development environment - dotfiles managed with chezmoi.
+> Personal development environment - dotfiles managed with chezmoi.
 
 ## Quick Start
 
 ```bash
 # One-line bootstrap on a new machine
-curl -fsSL https://raw.githubusercontent.com/dennybritz/denny-all-in-one/main/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/main/scripts/bootstrap.sh | bash
 ```
 
 Or manually:
 
 ```bash
-# Install chezmoi
-curl -fsSL https://chezmoi.io/get | bash
-
 # Clone this repo
-git clone https://github.com/dennybritz/denny-all-in-one.git ~/.local/share/denny-all-in-one
+git clone https://github.com/dennywu2966/denny-all-in-one.git
+cd denny-all-in-one
 
-# Apply dotfiles
-chezmoi init --source=~/.local/share/denny-all-in-one
-chezmoi apply
+# Backup existing configs (recommended)
+./scripts/backup.sh
+
+# Install chezmoi and apply dotfiles
+./scripts/bootstrap.sh
 ```
 
 ## What's Included
@@ -28,12 +28,15 @@ chezmoi apply
 ### Claude Code
 - **Settings**: `~/.claude/settings.json` - Hooks, plugins, MCP servers
 - **Skills**: 20+ custom skills for validation, e2e testing, etc.
-- **Commands**: Custom slash commands
+- **Scripts**: Custom utility scripts
 - **Hooks**: Checkpoint system, status line
 - **MCP**: Pre-configured servers (playwright, jina, etc.)
 
 ### Codex
-- **Config**: `~/.codex/config.toml` - Codex settings
+- **Config**: `~/.codex/config.toml` - Codex CLI settings
+
+### OpenCode
+- **Config**: `~/.config/opencode/opencode.json` - OpenCode settings
 
 ### Development Tools
 - **Neovim**: `~/.config/nvim/` - Neovim configuration
@@ -42,56 +45,67 @@ chezmoi apply
 - **UV**: `~/.config/uv/` - Python package manager config
 
 ### Shell
-- **Bash**: `~/.bashrc`, `~/.bashrc.d/`, `~/.profile`
+- **Bash**: `~/.bashrc`, `~/.profile`
+
+### Cloud & Agents
+- **Agents**: `~/.agents/skills/` - Agent skills
+- **Scripts**: `~/.scripts/` - Utility scripts
+- **Aliyun**: `~/.aliyun/` - Aliyun CLI config (template)
+- **OSS**: `~/.oss/` - Aliyun OSS config (template)
 
 ## Structure
 
 ```
 denny-all-in-one/
-├── .chezmoi.toml.tmpl    # chezmoi configuration template
+├── CLAUDE.md              # Project sync workflow docs
+├── README.md              # This file
+├── .chezmoi.toml.tmpl     # chezmoi configuration template
 ├── .chezmoiignore         # Files to exclude from sync
 ├── home/                  # Maps to ~ (home directory)
 │   ├── .claude/          # Claude Code assets
 │   ├── .codex/           # Codex config
-│   ├── .cargo/           # Cargo/Rust config
-│   ├── .config/          # Config files (nvim, git, go, uv)
+│   ├── .agents/          # Agent skills
+│   ├── .scripts/         # Utility scripts
+│   ├── .aliyun/          # Aliyun CLI config (template)
+│   ├── .oss/             # OSS config (template)
+│   ├── .config/          # XDG configs (nvim, git, go, uv, opencode)
 │   ├── .bashrc           # Bash configuration
 │   └── .profile          # Shell profile
 ├── scripts/              # Utility scripts
 │   ├── bootstrap.sh      # One-time setup script
 │   ├── backup.sh         # Backup existing dotfiles
 │   ├── restore.sh        # Restore from backup
+│   ├── sync-from-home.sh # Sync configs from ~ to project
+│   ├── docker-test-*.sh  # Docker testing scripts
 │   └── doctor.sh         # System health check
 └── docs/                 # Documentation
 ```
 
-## Daily Usage
+## Sync Workflow
 
-### Update dotfiles from current machine
+### Sync FROM Home Directory (Update Project)
 
-```bash
-# Edit your config files normally in ~
-# When ready to sync:
-
-chezmoi add ~/.claude/settings.json  # Add new file to tracking
-chezmoi update                       # Pull latest from remote
-git -C ~/.local/share/denny-all-in-one add -A
-git -C ~/.local/share/denny-all-in-one commit -m "Update settings"
-git -C ~/.local/share/denny-all-in-one push
-```
-
-### Apply on another machine
+When you've updated configs on your main machine, sync them to this project:
 
 ```bash
-chezmoi update    # Pull latest changes
-chezmoi apply     # Apply changes to home directory
+./scripts/sync-from-home.sh
+git add -A && git commit -m "Sync latest configs" && git push
 ```
 
-### Check system health
+### Sync TO Home Directory (Apply to Machine)
+
+After pulling latest changes, apply them to your home:
 
 ```bash
-~/.local/share/denny-all-in-one/scripts/doctor.sh
+# Option 1: Using chezmoi
+chezmoi init --source=.
+chezmoi apply
+
+# Option 2: Using bootstrap (with backup)
+./scripts/bootstrap.sh --backup
 ```
+
+**Tip:** Always backup before applying to preserve your current configurations.
 
 ## Backup and Restore
 
@@ -131,60 +145,62 @@ Backups are stored in `~/.dotfiles-backup/` with timestamped directories:
 └── latest -> 2026-02-21_15-00-00/
 ```
 
-## Machine-Specific Configuration
+## Scripts Reference
 
-Use chezmoi templates for machine differences:
-
-```bash
-# chezmoi will automatically populate these:
-{{ .hostname }}  # System hostname
-{{ .username }}  # Current username
-{{ .email }}     # Git email (passed via --data)
-```
-
-Example: `.chezmoi.toml.tmpl`
-
-```toml
-[data]
-  hostname = "{{ .hostname }}"
-  email = "{{ .email }}"
-```
+| Script | Purpose |
+|--------|---------|
+| `sync-from-home.sh` | Pull configs from ~ to project |
+| `bootstrap.sh` | One-time setup on new machine |
+| `backup.sh` | Backup existing dotfiles |
+| `restore.sh` | Restore from backup |
+| `docker-test-simple.sh` | Quick structure verification |
+| `docker-test-full.sh` | Full deployment test |
+| `doctor.sh` | System health check |
 
 ## Secrets Management
 
-This repo uses **chezmoi's built-in encryption** for secrets:
-
-```bash
-# Encrypt a file
-chezmoi secret encrypt --recipient <key-id> secret.txt > secret.txt.age
-
-# Use in templates
-{{ .chezmoi.homeDir }}/.secret/config.age
-```
+- **NEVER** commit API keys or tokens
+- Secrets are auto-stripped from .bashrc during sync
+- Store secrets in `~/.bashrc.local` (not tracked)
+- Cloud credentials use chezmoi templates (`.aliyun/config.json.tmpl`, `.oss/credentials.json.tmpl`)
 
 ## Excluded Files
 
 The following are never synced (see `.chezmoiignore`):
 
-- **Claude Code state**: `.claude.json`, history, cache, projects
+- **Claude Code state**: history, cache, projects, credentials
 - **Codex state**: auth, history, models cache
-- **Local overrides**: `local_*.tmpl`
+- **Cloud credentials**: `.aliyun/config.json`, `.oss/credentials.json`
+- **Local overrides**: `.bashrc.local`
+
+## Testing
+
+```bash
+# Quick structure test
+./scripts/docker-test-simple.sh
+
+# Full deployment test (installs chezmoi, applies dotfiles)
+./scripts/docker-test-full.sh
+
+# Health check
+./scripts/doctor.sh
+```
 
 ## Troubleshooting
 
- chezmoi apply fails with conflicts
+### chezmoi apply fails with conflicts
 
 ```bash
 chezmoi merge      # Interactive merge
 ```
 
-View what would change without applying
+### View what would change without applying
 
 ```bash
 chezmoi diff       # Show unapplied changes
 ```
 
-See which files are managed
+### See which files are managed
 
 ```bash
 chezmoi managed    # List tracked files
