@@ -93,10 +93,26 @@ BASHRC_DEST="$PROJECT_DIR/$(to_chezmoi_name .bashrc)"
 if [ -f "$HOME_DIR/.bashrc" ]; then
     cp "$HOME_DIR/.bashrc" "$BASHRC_DEST"
     # Strip API keys and secrets (lines containing common secret patterns)
+    # These should be stored in Bitwarden and accessed via templates
     sed -i -E '/export (RAM_AK|RAM_SK|JINA_API_KEY|DASHSCOPE_API_KEY|APP_ID|Z_AI_API_KEY|BIGMODEL_TOKEN|RUBE_TOKEN|KAGGLE_API_TOKEN|ANTHROPIC_API_KEY|OPENAI_API_KEY|BRAVE_API_KEY|SERPAPI_KEY|EXA_API_KEY|TAVILY_API_KEY|ZAI_API_KEY)=/d' "$BASHRC_DEST"
     echo "✓ dot_bashrc (secrets stripped)"
 fi
 sync_item "$HOME_DIR/.profile" "$PROJECT_DIR/$(to_chezmoi_name .profile)" "dot_profile"
+
+# Check for secrets in ~/.bashrc.local and offer to sync to Bitwarden
+echo ""
+echo "9a. Checking for API keys in ~/.bashrc.local..."
+if [ -f "$HOME_DIR/.bashrc.local" ]; then
+    SECRETS_COUNT=$(grep -c "export.*_KEY\|export.*_TOKEN\|export.*_SECRET\|export.*AK\|export.*SK" "$HOME_DIR/.bashrc.local" 2>/dev/null || echo "0")
+    if [ "$SECRETS_COUNT" -gt 0 ]; then
+        echo "  Found $SECRETS_COUNT potential secrets in ~/.bashrc.local"
+        echo "  These should be stored in Bitwarden. Run: ./scripts/bw-import-keys.sh"
+    else
+        echo "  No API keys found in ~/.bashrc.local"
+    fi
+else
+    echo "  ~/.bashrc.local not found"
+fi
 
 echo ""
 echo "9b. Syncing SSH config (public keys only)..."
@@ -200,6 +216,11 @@ echo "  Aliyun: dot_aliyun/config.json.tmpl (template)"
 echo "  OSS: dot_oss/credentials.json.tmpl (template)"
 echo ""
 echo "NOTE: Secret files (.aliyun/config.json, .oss/credentials.json) are NOT synced."
-echo "      Templates created for chezmoi to generate with your secret manager."
+echo "      Templates created for chezmoi to generate with Bitwarden."
+echo ""
+echo "SECRETS MANAGEMENT:"
+echo "  - API keys should be stored in Bitwarden"
+echo "  - Run ./scripts/bw-import-keys.sh to import keys from ~/.bashrc.local"
+echo "  - Templates use Bitwarden to render secrets at apply time"
 echo ""
 echo "Next: git add -A && git commit -m 'Sync latest configs' && git push"

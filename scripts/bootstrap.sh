@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 # Bootstrap script for denny-all-in-one dotfiles
 # Usage: curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/master/scripts/bootstrap.sh | bash
+#
+# Features:
+#   - Installs chezmoi and Bitwarden CLI
+#   - Prompts for Bitwarden password to unlock secrets
+#   - Applies dotfiles with chezmoi (secrets from Bitwarden)
+#
+# Options:
+#   --backup        Force backup before applying
+#   --no-backup     Skip backup prompt
+#   --local         Use local files (for testing)
+#   --skip-bitwarden Skip Bitwarden setup (secrets won't be rendered)
+#   --bw-password   Bitwarden password (for non-interactive use)
 
 set -euo pipefail
 
@@ -10,6 +22,8 @@ export PATH="$HOME/bin:$PATH"
 # Parse arguments
 BACKUP_FIRST=""
 LOCAL_MODE=false
+SKIP_BITWARDEN=false
+BW_PASSWORD=""
 REPO_URL="https://github.com/dennywu2966/denny-all-in-one.git"
 for arg in "$@"; do
     case "$arg" in
@@ -21,6 +35,13 @@ for arg in "$@"; do
             ;;
         --local)
             LOCAL_MODE=true
+            ;;
+        --skip-bitwarden)
+            SKIP_BITWARDEN=true
+            ;;
+        --bw-password)
+            shift
+            BW_PASSWORD="${1:-}"
             ;;
         *)
             # Assume it's a repo URL
@@ -146,9 +167,15 @@ init_chezmoi() {
     $CHEZMOI init "$REPO_URL"
   fi
 
-  # Apply the dotfiles
+  # Apply the dotfiles (with Bitwarden session if available)
   log_info "Applying dotfiles..."
-  $CHEZMOI apply -v
+  if [[ "$SKIP_BITWARDEN" != "true" ]] && [[ -n "${BW_SESSION:-}" ]]; then
+    log_info "Rendering templates with Bitwarden secrets..."
+    BW_SESSION="$BW_SESSION" $CHEZMOI apply -v
+  else
+    log_warn "Applying without Bitwarden - some templates may have placeholder values"
+    $CHEZMOI apply -v
+  fi
 }
 
 # Run post-apply checks
@@ -174,6 +201,27 @@ post_apply() {
     log_info "✓ Neovim config applied"
   else
     log_warn "✗ Neovim config not found"
+  fi
+
+  # Check Bitwarden templates
+  if [[ "$SKIP_BITWARDEN" != "true" ]]; then
+    # Check if Aliyun config was rendered with real values
+    if [[ -f "$HOME/.aliyun/config.json" ]]; then
+      if grep -q "bitwarden" "$HOME/.aliyun/config.json" 2>/dev/null; then
+        log_warn "✗ Aliyun config has placeholder (Bitwarden not working)"
+      else
+        log_info "✓ Aliyun config rendered with Bitwarden secrets"
+      fi
+    fi
+
+    # Check if OSS credentials were rendered
+    if [[ -f "$HOME/.oss/credentials.json" ]]; then
+      if grep -q "bitwarden" "$HOME/.oss/credentials.json" 2>/dev/null; then
+        log_warn "✗ OSS credentials have placeholder (Bitwarden not working)"
+      else
+        log_info "✓ OSS credentials rendered with Bitwarden secrets"
+      fi
+    fi
   fi
 }
 
@@ -218,17 +266,164 @@ run_backup() {
   esac
 }
 
+# Install Bitwarden CLI
+install_bitwarden() {
+  if [[ "$SKIP_BITWARDEN" == "true" ]]; then
+    log_info "Skipping Bitwarden setup (--skip-bitwarden)"
+    return 0
+  fi
+
+  if command -v bw &>/dev/null; then
+    log_info "Bitwarden CLI already installed: $(bw --version 2>/dev/null || echo 'unknown')"
+    return 0
+  fi
+
+  # Check if npm is available
+  if ! command -v npm &>/dev/null; then
+    log_warn "npm not found - skipping Bitwarden CLI installation"
+    log_warn "Install Node.js first, then run: npm install -g @bitwarden/cli"
+    SKIP_BITWARDEN=true
+    return 0
+  fi
+
+  log_info "Installing Bitwarden CLI..."
+  npm install -g @bitwarden/cli 2>/dev/null || {
+    log_warn "Failed to install Bitwarden CLI via npm"
+    log_warn "You can install manually with: npm install -g @bitwarden/cli"
+    SKIP_BITWARDEN=true
+    return 0
+  }
+
+  log_info "Bitwarden CLI installed: $(bw --version 2>/dev/null || echo 'installed')"
+}
+
+# Setup Bitwarden session for chezmoi
+setup_bitwarden() {
+  if [[ "$SKIP_BITWARDEN" == "true" ]]; then
+    log_warn "Bitwarden skipped - secret templates will NOT be rendered"
+    log_warn "Config files like .aliyun/config.json will have placeholder values"
+    return 0
+  fi
+
+  local status=$(bw status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+
+  case "$status" in
+    "unauthenticated")
+      log_info "Bitwarden: Not logged in"
+      echo ""
+      echo "To use Bitwarden for secrets management:"
+      echo "  1. Create account at https://vault.bitwarden.com (if needed)"
+      echo "  2. Run: bw login <your-email>"
+      echo ""
+
+      # Check if running interactively
+      if [[ ! -t 0 ]]; then
+        log_warn "Non-interactive mode - cannot prompt for Bitwarden login"
+        log_warn "Secret templates will NOT be rendered correctly"
+        SKIP_BITWARDEN=true
+        return 0
+      fi
+
+      read -rp "Login to Bitwarden now? [Y/n]: " response
+      case "$response" in
+        [nN][oO]|[nN])
+          log_warn "Skipping Bitwarden - secrets won't be rendered"
+          SKIP_BITWARDEN=true
+          return 0
+          ;;
+        *)
+          local email=""
+          read -rp "Bitwarden email: " email
+          if [[ -n "$email" ]]; then
+            bw login "$email" 2>&1 || {
+              log_warn "Bitwarden login failed"
+              SKIP_BITWARDEN=true
+              return 0
+            }
+            status=$(bw status 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+          else
+            log_warn "No email provided - skipping Bitwarden"
+            SKIP_BITWARDEN=true
+            return 0
+          fi
+          ;;
+      esac
+      ;;
+    "locked")
+      log_info "Bitwarden: Vault is locked"
+      ;;
+    "unlocked")
+      log_info "Bitwarden: Vault is unlocked"
+      # Export existing session
+      export BW_SESSION="${BW_SESSION:-}"
+      return 0
+      ;;
+  esac
+
+  # Unlock vault if locked or just logged in
+  if [[ "$status" == "locked" ]]; then
+    # Check if running interactively
+    if [[ ! -t 0 ]] && [[ -z "$BW_PASSWORD" ]]; then
+      log_warn "Non-interactive mode - cannot prompt for Bitwarden password"
+      log_warn "Use --bw-password or set BW_SESSION environment variable"
+      SKIP_BITWARDEN=true
+      return 0
+    fi
+
+    echo ""
+    log_info "Unlocking Bitwarden vault..."
+
+    if [[ -n "$BW_PASSWORD" ]]; then
+      # Non-interactive with password
+      export BW_SESSION=$(echo "$BW_PASSWORD" | bw unlock --raw 2>/dev/null) || {
+        log_warn "Failed to unlock Bitwarden vault"
+        SKIP_BITWARDEN=true
+        return 0
+      }
+    else
+      # Interactive prompt
+      export BW_SESSION=$(bw unlock --raw 2>/dev/null) || {
+        log_warn "Failed to unlock Bitwarden vault"
+        SKIP_BITWARDEN=true
+        return 0
+      }
+    fi
+
+    if [[ -z "$BW_SESSION" ]]; then
+      log_warn "Failed to get Bitwarden session"
+      SKIP_BITWARDEN=true
+      return 0
+    fi
+
+    log_info "Bitwarden vault unlocked successfully"
+  fi
+}
+
 # Main execution
 main() {
   log_info "Starting denny-all-in-one bootstrap..."
+  echo ""
   detect_os
   run_backup
   install_chezmoi
+  install_bitwarden
+  setup_bitwarden
   setup_dotfiles "$@"
   init_chezmoi
   post_apply
 
-  log_info "Bootstrap complete! Restart your shell or run: source ~/.bashrc"
+  echo ""
+  log_info "Bootstrap complete!"
+  echo ""
+  if [[ "$SKIP_BITWARDEN" == "true" ]]; then
+    echo "NOTE: Bitwarden was skipped. To enable secrets management:"
+    echo "  1. Install: npm install -g @bitwarden/cli"
+    echo "  2. Login: bw login <your-email>"
+    echo "  3. Unlock: bw unlock"
+    echo "  4. Re-apply: chezmoi apply"
+  fi
+  echo ""
+  echo "Restart your shell or run: source ~/.bashrc"
 }
 
 # Run main with any arguments (e.g., custom repo URL)
