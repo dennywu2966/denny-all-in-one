@@ -4,6 +4,9 @@
 
 set -euo pipefail
 
+# Ensure ~/bin is in PATH (chezmoi installs here)
+export PATH="$HOME/bin:$PATH"
+
 # Parse arguments
 BACKUP_FIRST=false
 for arg in "$@"; do
@@ -45,14 +48,23 @@ install_chezmoi() {
     return
   fi
 
+  # Check if chezmoi was installed to ~/bin but not in PATH
+  if [[ -x "$HOME/bin/chezmoi" ]]; then
+    export PATH="$HOME/bin:$PATH"
+    log_info "chezmoi already installed: $(chezmoi --version)"
+    return
+  fi
+
   log_info "Installing chezmoi..."
   if [[ "$OS" == "linux" ]]; then
     curl -fsSL https://chezmoi.io/get | bash
+    export PATH="$HOME/bin:$PATH"
   elif [[ "$OS" == "macos" ]]; then
     if command -v brew &>/dev/null; then
       brew install chezmoi
     else
       curl -fsSL https://chezmoi.io/get | bash
+      export PATH="$HOME/bin:$PATH"
     fi
   fi
 }
@@ -77,8 +89,14 @@ setup_dotfiles() {
 init_chezmoi() {
   local REPO_DIR="$HOME/.local/share/denny-all-in-one"
 
+  # Find chezmoi binary
+  local CHEZMOI="chezmoi"
+  if [[ -x "$HOME/bin/chezmoi" ]]; then
+    CHEZMOI="$HOME/bin/chezmoi"
+  fi
+
   log_info "Initializing chezmoi..."
-  chezmoi init --source="$REPO_DIR"
+  $CHEZMOI init --source="$REPO_DIR"
 
   # Check if running interactively
   if [[ -t 0 ]]; then
@@ -95,9 +113,9 @@ init_chezmoi() {
 
   # Apply with optional data
   if [[ -n "$EMAIL" ]]; then
-    chezmoi apply --source="$REPO_DIR" --data email="$EMAIL" --data editor="${EDITOR:-vim}"
+    $CHEZMOI apply --source="$REPO_DIR" --data email="$EMAIL" --data editor="${EDITOR:-vim}"
   else
-    chezmoi apply --source="$REPO_DIR" --data editor="${EDITOR:-vim}"
+    $CHEZMOI apply --source="$REPO_DIR" --data editor="${EDITOR:-vim}"
   fi
 }
 
