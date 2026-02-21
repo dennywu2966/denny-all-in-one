@@ -69,6 +69,7 @@ denny-all-in-one/
 │   ├── .aliyun/          # Aliyun CLI config (template)
 │   ├── .oss/             # OSS config (template)
 │   ├── .config/          # XDG configs (nvim, git, go, uv, opencode)
+│   ├── .ssh/             # SSH public keys (private keys excluded)
 │   ├── .bashrc           # Bash configuration
 │   └── .profile          # Shell profile
 ├── scripts/              # Utility scripts
@@ -159,9 +160,10 @@ Backups are stored in `~/.dotfiles-backup/` with timestamped directories:
 
 ## Secrets Management
 
-- **NEVER** commit API keys or tokens
+- **NEVER** commit API keys, tokens, or private SSH keys
 - Secrets are auto-stripped from .bashrc during sync
 - Store secrets in `~/.bashrc.local` (not tracked)
+- SSH private keys are excluded (only public keys synced)
 - Cloud credentials use chezmoi templates (`.aliyun/config.json.tmpl`, `.oss/credentials.json.tmpl`)
 
 ## Excluded Files
@@ -171,6 +173,7 @@ The following are never synced (see `.chezmoiignore`):
 - **Claude Code state**: history, cache, projects, credentials
 - **Codex state**: auth, history, models cache
 - **Cloud credentials**: `.aliyun/config.json`, `.oss/credentials.json`
+- **SSH private keys**: `id_ed25519`, `id_rsa`, `*.pem`
 - **Local overrides**: `.bashrc.local`
 
 ## Testing

@@ -101,6 +101,13 @@ fi
 sync_item "$HOME_DIR/.profile" "$PROJECT_DIR/home/.profile" ".profile"
 
 echo ""
+echo "9b. Syncing SSH config (public keys only)..."
+mkdir -p "$PROJECT_DIR/home/.ssh"
+sync_item "$HOME_DIR/.ssh/authorized_keys" "$PROJECT_DIR/home/.ssh/authorized_keys" "authorized_keys"
+sync_item "$HOME_DIR/.ssh/id_ed25519.pub" "$PROJECT_DIR/home/.ssh/id_ed25519.pub" "id_ed25519.pub"
+sync_item "$HOME_DIR/.ssh/known_hosts" "$PROJECT_DIR/home/.ssh/known_hosts" "known_hosts"
+
+echo ""
 echo "10. Syncing ~/.agents..."
 rm -rf "$PROJECT_DIR/home/.agents" 2>/dev/null || true
 if [ -d "$HOME_DIR/.agents" ]; then

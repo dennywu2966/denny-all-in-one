@@ -84,6 +84,7 @@ BACKUP_PATHS=(
     ".scripts"
     ".aliyun"
     ".oss"
+    ".ssh"
     ".bashrc"
     ".profile"
 )

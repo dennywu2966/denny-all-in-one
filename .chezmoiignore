@@ -41,6 +41,13 @@
 .aliyun/config.json
 .oss/credentials.json
 
+# SSH private keys (NEVER sync)
+.ssh/id_ed25519
+.ssh/id_rsa
+.ssh/id_ecdsa
+.ssh/id_dsa
+.ssh/*.pem
+
 # Agents state (machine-specific)
 .agents/.skill-lock.json
 
