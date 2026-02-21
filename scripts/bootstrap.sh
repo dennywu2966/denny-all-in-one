@@ -89,10 +89,17 @@ setup_dotfiles() {
 init_chezmoi() {
   local REPO_DIR="$HOME/.local/share/denny-all-in-one"
 
-  # Find chezmoi binary
-  local CHEZMOI="chezmoi"
-  if [[ -x "$HOME/bin/chezmoi" ]]; then
+  # Find chezmoi binary (may be in /usr/bin, ~/bin, or need hash refresh)
+  local CHEZMOI=""
+  if [[ -x "/usr/bin/chezmoi" ]]; then
+    CHEZMOI="/usr/bin/chezmoi"
+  elif [[ -x "$HOME/bin/chezmoi" ]]; then
     CHEZMOI="$HOME/bin/chezmoi"
+  elif command -v chezmoi &>/dev/null; then
+    CHEZMOI="chezmoi"
+  else
+    log_error "chezmoi not found. Please install it manually."
+    exit 1
   fi
 
   log_info "Initializing chezmoi..."
