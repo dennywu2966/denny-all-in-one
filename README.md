@@ -223,11 +223,20 @@ Chezmoi templates use Go template syntax to reference Bitwarden items:
 ```bash
 # Login and unlock
 bw login your-email@example.com
-bw unlock
+export BW_SESSION=$(bw unlock --raw)
 
-# Get a specific secret
-bw get item "aliyun-ram-key" | jq -r '.login.username'  # Access Key ID
-bw get item "aliyun-ram-key" | jq -r '.login.password'  # Secret
+# Get a specific secret (requires jq)
+bw get item "aliyun-access-key" | jq -r '.login.username'  # Access Key ID
+bw get item "aliyun-access-key" | jq -r '.login.password'  # Secret
+```
+
+**Note:** The commands above require `jq` for JSON parsing. Install with:
+```bash
+# Linux
+sudo apt install jq
+
+# macOS
+brew install jq
 ```
 
 ---
