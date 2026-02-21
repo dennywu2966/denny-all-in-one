@@ -17,11 +17,6 @@
   editor = "{{ .editor }}"
   {{- end }}
 
-[templateOptions]
-  # Template syntax options
-  leftDelimiter = "{{"
-  rightDelimiter = "}}"
-
 [diff]
   # Use pager for diffs
   pager = "less -F"
@@ -34,9 +29,3 @@
   # Auto-commit after chezmoi apply
   autoCommit = false
   autoPush = false
-
-{{ if stat (joinPath .chezmoi.homeDir ".ssh" "id_ed25519.pub") }}
-# SSH key exists - can configure git
-{{ else }}
-# No SSH key - will prompt for setup
-{{ end }}
