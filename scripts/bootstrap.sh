@@ -80,16 +80,24 @@ init_chezmoi() {
   log_info "Initializing chezmoi..."
   chezmoi init --source="$REPO_DIR"
 
-  # Prompt for user-specific data
-  log_info "Enter optional configuration (press Enter to skip):"
-  read -rp "Git email [optional]: " EMAIL
-  read -rp "Default editor [vim]: " EDITOR
+  # Check if running interactively
+  if [[ -t 0 ]]; then
+    # Prompt for user-specific data (interactive mode)
+    log_info "Enter optional configuration (press Enter to skip):"
+    read -rp "Git email [optional]: " EMAIL
+    read -rp "Default editor [vim]: " EDITOR
+  else
+    # Non-interactive mode - use defaults
+    log_info "Non-interactive mode - using defaults"
+    EMAIL=""
+    EDITOR="vim"
+  fi
 
   # Apply with optional data
   if [[ -n "$EMAIL" ]]; then
-    chezmoi apply --source="$REPO_DIR" --prompt --data email="$EMAIL" --data editor="${EDITOR:-vim}"
+    chezmoi apply --source="$REPO_DIR" --data email="$EMAIL" --data editor="${EDITOR:-vim}"
   else
-    chezmoi apply --source="$REPO_DIR" --prompt --data editor="${EDITOR:-vim}"
+    chezmoi apply --source="$REPO_DIR" --data editor="${EDITOR:-vim}"
   fi
 }
 
