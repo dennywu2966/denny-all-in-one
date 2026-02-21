@@ -1,31 +1,5 @@
 # chezmoi configuration template
-# Variables:
-#   {{ .hostname }} - system hostname
-#   {{ .username }} - current username
-#   {{ .email }} - git email (set via --prompt or env)
 
 [data]
-  # User-specific data
   hostname = "{{ .hostname }}"
   username = "{{ .username }}"
-
-  {{- if .email }}
-  email = "{{ .email }}"
-  {{- end }}
-
-  {{- if .editor }}
-  editor = "{{ .editor }}"
-  {{- end }}
-
-[diff]
-  # Use pager for diffs
-  pager = "less -F"
-
-[merge]
-  # Merge command for conflicts
-  command = "vimdiff"
-
-[git]
-  # Auto-commit after chezmoi apply
-  autoCommit = false
-  autoPush = false
