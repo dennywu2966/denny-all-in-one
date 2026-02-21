@@ -8,13 +8,16 @@ set -euo pipefail
 export PATH="$HOME/bin:$PATH"
 
 # Parse arguments
-BACKUP_FIRST=false
+BACKUP_FIRST=""
 LOCAL_MODE=false
 REPO_URL="https://github.com/dennywu2966/denny-all-in-one.git"
 for arg in "$@"; do
     case "$arg" in
         --backup)
-            BACKUP_FIRST=true
+            BACKUP_FIRST="yes"
+            ;;
+        --no-backup)
+            BACKUP_FIRST="no"
             ;;
         --local)
             LOCAL_MODE=true
@@ -176,12 +179,43 @@ post_apply() {
 
 # Run backup if requested
 run_backup() {
-  if [[ "$BACKUP_FIRST" == "true" ]]; then
+  # If --backup was explicitly passed, run backup without prompting
+  if [[ "$BACKUP_FIRST" == "yes" ]]; then
     log_info "Creating backup before applying dotfiles..."
     local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     bash "$SCRIPT_DIR/backup.sh"
     echo ""
+    return
   fi
+
+  # If --no-backup was passed, skip backup
+  if [[ "$BACKUP_FIRST" == "no" ]]; then
+    log_info "Skipping backup (--no-backup specified)"
+    return
+  fi
+
+  # Check if running interactively
+  if [[ ! -t 0 ]]; then
+    log_info "Non-interactive mode - skipping backup (use --backup to force)"
+    return
+  fi
+
+  # Prompt user for backup
+  echo ""
+  log_warn "About to apply dotfiles which may overwrite existing configurations."
+  echo ""
+  read -rp "Create a backup first? [Y/n]: " response
+  case "$response" in
+    [nN][oO]|[nN])
+      log_info "Skipping backup..."
+      ;;
+    *)
+      log_info "Creating backup before applying dotfiles..."
+      local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+      bash "$SCRIPT_DIR/backup.sh"
+      echo ""
+      ;;
+  esac
 }
 
 # Main execution
