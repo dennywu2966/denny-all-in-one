@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bootstrap script for denny-all-in-one dotfiles
-# Usage: curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/main/scripts/bootstrap.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/master/scripts/bootstrap.sh | bash
 
 set -euo pipefail
 

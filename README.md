@@ -6,7 +6,7 @@
 
 ```bash
 # One-line bootstrap on a new machine
-curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/main/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dennywu2966/denny-all-in-one/master/scripts/bootstrap.sh | bash
 ```
 
 Or manually:
