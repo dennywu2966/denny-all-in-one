@@ -1,6 +1,19 @@
 # chezmoi ignore patterns
 # These files/directories will NOT be managed by chezmoi
 
+# Repository files (not dotfiles)
+README.md
+CLAUDE.md
+docs/
+scripts/
+.gitignore
+bin/
+home/
+
+# External symlinks (point to paths outside this repo)
+.agents/skills/superpowers
+.claude/skills/mermaid-diagrams
+
 # Machine-specific state (never sync)
 # NOTE: .claude.json is now included as .claude.json.tmpl to preserve user preferences
 # Only exclude sensitive credentials:

@@ -23,7 +23,12 @@ docker pull $IMAGE 2>&1 | tail -3
 
 echo ""
 echo "2. Creating and starting container..."
-docker run -d --name "$CONTAINER_NAME" $IMAGE sleep infinity
+if [[ "$LOCAL_MODE" == "true" ]]; then
+    # Mount local files for development
+    docker run -d --name "$CONTAINER_NAME" -v "$PROJECT_DIR:/dotfiles:ro" $IMAGE sleep infinity
+else
+    docker run -d --name "$CONTAINER_NAME" $IMAGE sleep infinity
+fi
 
 echo ""
 echo "3. Installing dependencies..."
@@ -36,11 +41,10 @@ docker exec "$CONTAINER_NAME" bash -c "
 echo ""
 echo "4. Running bootstrap script..."
 if [[ "$LOCAL_MODE" == "true" ]]; then
-    # Copy local files and run
-    docker cp "$PROJECT_DIR" "$CONTAINER_NAME:/tmp/dotfiles"
+    # Run local version with --local flag
     docker exec "$CONTAINER_NAME" bash -c "
-        cd /tmp/dotfiles/denny-all-in-one 2>/dev/null || cd /tmp/dotfiles
-        bash scripts/bootstrap.sh
+        cd /dotfiles
+        bash scripts/bootstrap.sh --local
     "
 else
     # Use GitHub version

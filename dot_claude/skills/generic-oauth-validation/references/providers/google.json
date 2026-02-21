@@ -1,0 +1,139 @@
+{
+  "id": "google",
+  "name": "Google SSO",
+  "description": "Google Workspace / Gmail SSO 登录",
+  
+  "triggers": ["google", "gmail", "gcp", "workspace", "google-workspace"],
+  
+  "selectors": {
+    "username": {
+      "selector": "input[type='email']",
+      "fallback": [
+        "input[name='identifier']",
+        "input[id='identifierId']",
+        "input[aria-label='Email or phone']"
+      ]
+    },
+    "password": {
+      "selector": "input[type='password']",
+      "fallback": [
+        "input[name='password']",
+        "input[aria-label='Enter your password']"
+      ]
+    },
+    "nextButton": {
+      "selector": "button:has-text('Next')",
+      "fallback": [
+        "#identifierNext",
+        "#passwordNext",
+        "button[type='button']:has-text('下一步')"
+      ]
+    },
+    "loginButton": {
+      "selector": "button:has-text('Next')",
+      "fallback": [
+        "#passwordNext",
+        "button[type='button']"
+      ]
+    },
+    "mfaScreen": {
+      "selector": "[data-challengetype]",
+      "types": {
+        "sms": "[data-challengetype='5'], div:has-text('Text message')",
+        "totp": "[data-challengetype='6'], div:has-text('Google Prompt')",
+        "email": "[data-challengetype='1'], div:has-text('Email')",
+        "backup": "[data-challengetype='4'], div:has-text('Backup code')"
+      }
+    },
+    "mfaInput": {
+      "sms": "input[type='tel'], input[autocomplete='one-time-code']",
+      "totp": "input[type='tel'], input[autocomplete='one-time-code']",
+      "email": "input[type='tel'], input[autocomplete='one-time-code']",
+      "fallback": "input[maxlength='6']"
+    },
+    "getCodeButton": {
+      "selector": "button:has-text('Send'), button:has-text('Get code')",
+      "fallback": [
+        "button:has-text('发送')",
+        "button[data-send-verification-code]"
+      ]
+    },
+    "submitButton": {
+      "selector": "button:has-text('Next'), button:has-text('Verify')",
+      "fallback": [
+        "button[type='button']",
+        "button:has-text('继续')"
+      ]
+    },
+    "authorizeButton": {
+      "selector": "button:has-text('Allow'), button:has-text('Continue')",
+      "fallback": [
+        "button[type='button']:has-text('允许')",
+        "#submit_approve_access"
+      ]
+    }
+  },
+  
+  "mfa": {
+    "defaultType": "prompt",
+    "types": ["sms", "totp", "email", "backup"],
+    "promptUser": true,
+    "sms": {
+      "needPhoneInput": false,
+      "promptTemplate": "Google 已发送验证码到您的手机，请输入 6 位验证码：",
+      "codeRegex": "\\d{6}",
+      "maxWaitSeconds": 300
+    },
+    "totp": {
+      "promptTemplate": "请查看 Google Authenticator 应用，输入 6 位验证码：",
+      "codeRegex": "\\d{6}",
+      "autoGenerate": false
+    },
+    "email": {
+      "promptTemplate": "Google 已发送验证码到您的备用邮箱，请输入 6 位验证码：",
+      "codeRegex": "\\d{6}",
+      "maxWaitSeconds": 300
+    }
+  },
+  
+  "detection": {
+    "loginPageText": "Sign in",
+    "mfaPageText": "2-Step Verification",
+    "codeSentText": "Code sent",
+    "successText": "Welcome",
+    "errorTexts": [
+      "Wrong password",
+      "Couldn\'t find your Google Account",
+      "Enter a valid email",
+      "Invalid code",
+      "The code you entered didn\'t work"
+    ]
+  },
+  
+  "flows": {
+    "usernameFirst": true,
+    "separatePasswordStep": true,
+    "mfaRequired": true,
+    "authorizationStep": true,
+    "dynamicMFA": true
+  },
+  
+  "hooks": {
+    "preFill": null,
+    "postMFA": null,
+    "preAuthorize": null,
+    "automation": {
+      "enabled": false,
+      "smsProvider": null,
+      "captchaSolver": null
+    }
+  },
+  
+  "notes": {
+    "captcha": "Google 可能显示 reCAPTCHA 挑战",
+    "mfaSelection": "用户可能配置了多种 MFA 方式，需要选择合适的",
+    "deviceVerification": "新设备可能需要额外验证",
+    "lessSecureApps": "某些应用需要启用'不够安全的应用访问权限'",
+    "sessionTimeout": "验证码通常 5 分钟有效"
+  }
+}

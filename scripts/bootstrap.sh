@@ -9,10 +9,19 @@ export PATH="$HOME/bin:$PATH"
 
 # Parse arguments
 BACKUP_FIRST=false
+LOCAL_MODE=false
+REPO_URL="https://github.com/dennywu2966/denny-all-in-one.git"
 for arg in "$@"; do
     case "$arg" in
         --backup)
             BACKUP_FIRST=true
+            ;;
+        --local)
+            LOCAL_MODE=true
+            ;;
+        *)
+            # Assume it's a repo URL
+            REPO_URL="$arg"
             ;;
     esac
 done
@@ -55,7 +64,17 @@ install_chezmoi() {
     return
   fi
 
+  # Check if chezmoi was installed to /usr/bin (root installation)
+  if [[ -x "/usr/bin/chezmoi" ]]; then
+    log_info "chezmoi already installed: $(/usr/bin/chezmoi --version)"
+    return
+  fi
+
   log_info "Installing chezmoi..."
+  # Change to home directory to avoid permission issues with read-only mounts
+  local ORIGINAL_DIR="$(pwd)"
+  cd "$HOME"
+
   if [[ "$OS" == "linux" ]]; then
     curl -fsSL https://chezmoi.io/get | bash
     export PATH="$HOME/bin:$PATH"
@@ -67,34 +86,28 @@ install_chezmoi() {
       export PATH="$HOME/bin:$PATH"
     fi
   fi
+
+  cd "$ORIGINAL_DIR"
 }
 
-# Clone or update dotfiles repo
+# Clone or update dotfiles repo (optional - chezmoi can do this directly)
 setup_dotfiles() {
+  # This function is now optional - chezmoi init can clone directly
+  # Keeping for backwards compatibility
   local REPO_URL="${1:-https://github.com/dennywu2966/denny-all-in-one.git}"
-  local REPO_DIR="$HOME/.local/share/denny-all-in-one"
-
-  if [[ -d "$REPO_DIR" ]]; then
-    log_info "Updating existing dotfiles..."
-    cd "$REPO_DIR"
-    git pull
-  else
-    log_info "Cloning dotfiles repository..."
-    mkdir -p "$HOME/.local/share"
-    git clone "$REPO_URL" "$REPO_DIR"
-  fi
+  log_info "Will use chezmoi to clone: $REPO_URL"
 }
 
 # Initialize chezmoi with the repo
 init_chezmoi() {
-  local REPO_DIR="$HOME/.local/share/denny-all-in-one"
-
-  # Find chezmoi binary (may be in /usr/bin, ~/bin, or need hash refresh)
+  # Find chezmoi binary (check common locations)
   local CHEZMOI=""
-  if [[ -x "/usr/bin/chezmoi" ]]; then
-    CHEZMOI="/usr/bin/chezmoi"
-  elif [[ -x "$HOME/bin/chezmoi" ]]; then
+  if [[ -x "$HOME/bin/chezmoi" ]]; then
     CHEZMOI="$HOME/bin/chezmoi"
+  elif [[ -x "/usr/bin/chezmoi" ]]; then
+    CHEZMOI="/usr/bin/chezmoi"
+  elif [[ -x "/usr/local/bin/chezmoi" ]]; then
+    CHEZMOI="/usr/local/bin/chezmoi"
   elif command -v chezmoi &>/dev/null; then
     CHEZMOI="chezmoi"
   else
@@ -102,28 +115,37 @@ init_chezmoi() {
     exit 1
   fi
 
-  log_info "Initializing chezmoi..."
-  $CHEZMOI init --source="$REPO_DIR"
+  log_info "Initializing chezmoi with: $CHEZMOI"
 
-  # Check if running interactively
-  if [[ -t 0 ]]; then
-    # Prompt for user-specific data (interactive mode)
-    log_info "Enter optional configuration (press Enter to skip):"
-    read -rp "Git email [optional]: " EMAIL
-    read -rp "Default editor [vim]: " EDITOR
+  if [[ "$LOCAL_MODE" == "true" ]]; then
+    # Local mode: copy from mounted directory
+    local SOURCE_DIR="/dotfiles"
+    if [[ ! -d "$SOURCE_DIR" ]]; then
+      log_error "Local mode requires /dotfiles mount"
+      exit 1
+    fi
+    log_info "Using local source: $SOURCE_DIR"
+
+    # Create chezmoi source directory
+    mkdir -p "$HOME/.local/share/chezmoi"
+
+    # Copy all files from source to chezmoi directory
+    # Skip .git directory to save space
+    cp -r "$SOURCE_DIR"/* "$HOME/.local/share/chezmoi/"
+    cp "$SOURCE_DIR"/.chezmoi* "$HOME/.local/share/chezmoi/" 2>/dev/null || true
+    cp "$SOURCE_DIR"/.gitignore "$HOME/.local/share/chezmoi/" 2>/dev/null || true
+
+    # Initialize chezmoi config
+    $CHEZMOI init
   else
-    # Non-interactive mode - use defaults
-    log_info "Non-interactive mode - using defaults"
-    EMAIL=""
-    EDITOR="vim"
+    # Remote mode: clone from git
+    log_info "Cloning dotfiles from: $REPO_URL"
+    $CHEZMOI init "$REPO_URL"
   fi
 
-  # Apply with optional data
-  if [[ -n "$EMAIL" ]]; then
-    $CHEZMOI apply --source="$REPO_DIR" --data email="$EMAIL" --data editor="${EDITOR:-vim}"
-  else
-    $CHEZMOI apply --source="$REPO_DIR" --data editor="${EDITOR:-vim}"
-  fi
+  # Apply the dotfiles
+  log_info "Applying dotfiles..."
+  $CHEZMOI apply -v
 }
 
 # Run post-apply checks

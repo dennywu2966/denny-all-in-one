@@ -1,0 +1,127 @@
+{
+  "id": "your-provider-id",
+  "name": "Your Provider Name",
+  "description": "Description of your OAuth provider",
+  
+  "triggers": ["keyword1", "keyword2", "keyword3"],
+  
+  "selectors": {
+    "username": {
+      "selector": "input[type='email']",
+      "fallback": [
+        "input[name='username']",
+        "input[id='username']"
+      ]
+    },
+    "password": {
+      "selector": "input[type='password']",
+      "fallback": [
+        "input[name='password']",
+        "input[id='password']"
+      ]
+    },
+    "nextButton": {
+      "selector": "button:has-text('Next')",
+      "fallback": [
+        "button[type='submit']",
+        "button:has-text('Continue')"
+      ]
+    },
+    "loginButton": {
+      "selector": "button:has-text('Sign in')",
+      "fallback": [
+        "button[type='submit']",
+        "button:has-text('Log in')"
+      ]
+    },
+    "mfaTab": {
+      "sms": "tab:has-text('SMS'), [data-mfa-type='sms']",
+      "totp": "tab:has-text('Authenticator'), [data-mfa-type='totp']",
+      "email": "tab:has-text('Email'), [data-mfa-type='email']"
+    },
+    "mfaInput": {
+      "sms": "input[name='code'], input[placeholder*='code']",
+      "totp": "input[name='totp'], input[placeholder*='TOTP']",
+      "email": "input[name='email-code'], input[placeholder*='email']",
+      "fallback": "input[maxlength='6']"
+    },
+    "getCodeButton": {
+      "selector": "button:has-text('Send code')",
+      "fallback": [
+        "button:has-text('Get code')",
+        "button[class*='send-verification']"
+      ]
+    },
+    "submitButton": {
+      "selector": "button:has-text('Verify'), button:has-text('Submit')",
+      "fallback": [
+        "button[type='submit']",
+        "button:has-text('Continue')"
+      ]
+    },
+    "authorizeButton": {
+      "selector": "button:has-text('Allow'), button:has-text('Authorize')",
+      "fallback": [
+        "button[type='submit']:has-text('Approve')",
+        "button:has-text('Accept')"
+      ]
+    }
+  },
+  
+  "mfa": {
+    "defaultType": "sms",
+    "types": ["sms", "totp", "email"],
+    "sms": {
+      "needPhoneInput": true,
+      "promptTemplate": "请输入验证码：",
+      "codeRegex": "\\d{6}",
+      "maxWaitSeconds": 300
+    },
+    "totp": {
+      "promptTemplate": "请输入 TOTP 验证码：",
+      "codeRegex": "\\d{6}",
+      "autoGenerate": false
+    },
+    "email": {
+      "promptTemplate": "请输入邮箱验证码：",
+      "codeRegex": "\\d{6}",
+      "maxWaitSeconds": 300
+    }
+  },
+  
+  "detection": {
+    "loginPageText": "Sign in",
+    "mfaPageText": "Two-factor authentication",
+    "codeSentText": "Code sent",
+    "successText": "Welcome",
+    "errorTexts": [
+      "Invalid credentials",
+      "Wrong password",
+      "Invalid code"
+    ]
+  },
+  
+  "flows": {
+    "usernameFirst": true,
+    "separatePasswordStep": true,
+    "mfaRequired": true,
+    "authorizationStep": true
+  },
+  
+  "hooks": {
+    "preFill": null,
+    "postMFA": null,
+    "preAuthorize": null,
+    "automation": {
+      "enabled": false,
+      "smsProvider": null,
+      "captchaSolver": null
+    }
+  },
+  
+  "notes": {
+    "setup": "如何获取选择器：打开浏览器开发者工具，检查元素，复制 selector",
+    "captcha": "如果提供商使用验证码，可能需要人工介入",
+    "troubleshooting": "如果元素未找到，尝试添加更多 fallback 选择器"
+  }
+}
